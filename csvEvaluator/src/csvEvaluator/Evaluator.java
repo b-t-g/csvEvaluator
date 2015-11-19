@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import csvEvaluator.Parser.Operation;
+
 
 public class Evaluator {
     private static ArrayList<Integer> columnNameToIndex;
@@ -236,7 +238,10 @@ public class Evaluator {
         String[] rowInTable2;
         int columnsInRow1 = 0;
         int columnsInRow2 = 0;
+        ArrayList<String[]> misMatchedTable2 = new ArrayList<String[]>();
         while(!(endOfFile1 && endOfFile2)) {
+            boolean rowInTable1Null = false;
+            boolean rowInTable2Null = false;
             String file1Row = file1.readLine();
             String file2Row = file2.readLine();
             if(endOfFile1 || file1Row == null) {
@@ -253,16 +258,34 @@ public class Evaluator {
                 rowInTable2 = file2Row.split(",");
                 columnsInRow2 = rowInTable2.length;
             }
-            if(combineColumns(rowInTable1, rowInTable2)){
-                if(rowInTable1 == null && !endOfFile2) {
-                    file1Row = createNullString(columnsInRow1);
-                }else if(rowInTable2 == null && !endOfFile1) {
-                    file2Row = createNullString(columnsInRow2);
-                }
-                String[][] joinedColumn = {rowInTable1, rowInTable2};
-                joinedTable.add(joinedColumn);
-                System.out.println(file1Row+","+file2Row);
+            if(rowInTable1 == null && !endOfFile2) {
+                file1Row = createNullString(columnsInRow1);
+                rowInTable1 = file1Row.split(",");
+                rowInTable1Null = true;
+            } else if(rowInTable2 == null && !endOfFile1) {
+                file2Row = createNullString(columnsInRow2);
+                rowInTable2 = file2Row.split(",");
+                rowInTable2Null = true;
+            } if (rowInTable1 == null && rowInTable2 == null) {
+                continue;
             }
+            if(rowInTable1[columnNameToIndex.get(0)].equals(rowInTable2[columnNameToIndex.get(1)])) {
+                System.out.println(file1Row+","+file2Row);
+            } else if(operation.equals(Operation.OUTER_JOIN)) {
+                prettyPrint(rowInTable1);
+                System.out.print(",");
+                System.out.println(createNullString(columnsInRow2));
+                if(!rowInTable2Null) {
+                    misMatchedTable2.add(rowInTable2);
+                }
+            }
+        }
+        for(String[] row : misMatchedTable2) {
+            System.out.print(createNullString(columnsInRow1)+",");
+            for(int i = 0; i < row.length-1; i++) {
+                System.out.print(row[i]+",");
+            }
+            System.out.println(row[row.length-1]);
         }
         return joinedTable;
     }
@@ -281,6 +304,45 @@ public class Evaluator {
         }
         nullRows.append("null");
         return new String(nullRows);
+    }
+
+    /**
+     * This function takes in a cross join of two tables and prints the inner or outer join of the
+     * original two tables depending on the operation.
+     * @param crossJoin
+     */
+    private static void filterCrossJoin(ArrayList<String[][]> crossJoin, int columnsInRow1, int columnsInRow2) {
+        if(operation.equals(Operation.INNER_JOIN)) {
+            filterInnerJoin(crossJoin);
+        } else {
+            filterOuterJoin(crossJoin, columnsInRow1, columnsInRow2);
+        }
+    }
+
+    private static void filterInnerJoin(ArrayList<String[][]> crossJoin) {
+       for(String[][] s : crossJoin) {
+           if(innerJoinColumns(s[0],s[1])) {
+               prettyPrint(s[0]);
+               System.out.print(",");
+               prettyPrint(s[1]);
+               System.out.println();
+           }
+       } 
+    }
+
+    private static void filterOuterJoin(ArrayList<String[][]> crossJoin, int columnsInRow1, int columnsInRow2) {
+        for(String[][] s : crossJoin) {
+            prettyPrint(s[0]);
+            System.out.print(",");
+            System.out.println(createNullString(columnsInRow2));
+        }
+    }
+
+    private static void prettyPrint(String[] row) {
+        for(int i = 0; i < row.length-1; i++) {
+            System.out.print(row[i]+",");
+        }
+        System.out.print(row[row.length-1]);
     }
 
     /**

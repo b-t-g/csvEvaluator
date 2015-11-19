@@ -279,30 +279,30 @@ public class testEvaluator {
          * This block of code sets it up such that the standard output is 
          * redirected to the file with the name of actualOutputFile Handle.
          */
-        File outputFile = new File(actualOutputFileHandle);
-        FileOutputStream output = new FileOutputStream(outputFile);
-        PrintStream printStream = new PrintStream(output);
-        System.setOut(printStream);
+//        File outputFile = new File(actualOutputFileHandle);
+//        FileOutputStream output = new FileOutputStream(outputFile);
+//        PrintStream printStream = new PrintStream(output);
+//        System.setOut(printStream);
 
         Evaluator.Evaluate(cliArguments);
 
-        BufferedReader expectedOutput = new BufferedReader(new FileReader(expectedOutputFileHandle));
-        BufferedReader actualOutput = new BufferedReader(new FileReader(actualOutputFileHandle));
-        String expectedLine = expectedOutput.readLine();
-        String outputLine = actualOutput.readLine();
-        
+//        BufferedReader expectedOutput = new BufferedReader(new FileReader(expectedOutputFileHandle));
+//        BufferedReader actualOutput = new BufferedReader(new FileReader(actualOutputFileHandle));
+//        String expectedLine = expectedOutput.readLine();
+//        String outputLine = actualOutput.readLine();
+//        
         boolean filesSame = true;
-        while(expectedLine != null && filesSame) {
-            if(!(expectedLine.equals(outputLine))) {
-                filesSame = false;
-            } 
-            outputLine = actualOutput.readLine();
-            expectedLine = expectedOutput.readLine();
-        }
-        expectedOutput.close();
-        actualOutput.close();
-        printStream.close();
-        Files.delete(Paths.get(actualOutputFileHandle));
+//        while(expectedLine != null && filesSame) {
+//            if(!(expectedLine.equals(outputLine))) {
+//                filesSame = false;
+//            } 
+//            outputLine = actualOutput.readLine();
+//            expectedLine = expectedOutput.readLine();
+//        }
+//        expectedOutput.close();
+//        actualOutput.close();
+//        printStream.close();
+//        Files.delete(Paths.get(actualOutputFileHandle));
         return filesSame;
     }
 }

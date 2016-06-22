@@ -1,4 +1,6 @@
-package csvEvaluator;
+package csvEvaluator.src.csvEvaluator;
+
+import csvEvaluator.src.operations.Operation;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -17,10 +19,10 @@ public class Parser {
      * @param cliArguments arguments supplied from the command line
      * @return arraylist of buffered readers for the supplied files
      * @throws FileNotFoundException
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
     public static ArrayList<BufferedReader> parseFiles(String[] cliArguments)
-            throws FileNotFoundException, InvalidArgumentException {
+            throws FileNotFoundException, IllegalArgumentException {
         ArrayList<BufferedReader> files = new ArrayList<BufferedReader>();
         String[] filesArgument = getIndexAndSplit(cliArguments, "--files=")[1].split(",");
         for(String fileName : filesArgument) {
@@ -33,9 +35,9 @@ public class Parser {
      * Takes in the arguments supplied from the command line and returns the operation supplied
      * @param cliArguments arguments supplied from the command line
      * @return the supplied operation
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
-    public static Operation parseOperation(String[] cliArguments) throws InvalidArgumentException {
+    public static Operation parseOperation(String[] cliArguments) throws IllegalArgumentException {
         String[] operationArgument = getIndexAndSplit(cliArguments, "--operation=");
         if(isJoin(operationArgument[1])) {
             return returnJoin(operationArgument[1]);
@@ -47,21 +49,21 @@ public class Parser {
                 }
             }
         }
-        throw new InvalidArgumentException();
+        throw new IllegalArgumentException();
     }
 
     /**
      * Takes in arguments from the command line and returns the index of the supplied columns
      * from the intended files.
-     * @param args arguments from the command line
+     * @param cliArguments arguments from the command line
      * @param csvFile supplied files
      * @return an array list of the index of the columns in the intended files.
      * @throws IOException
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
     public static ArrayList<Integer> parseColumnNameToIndex(
             String[] cliArguments,
-            BufferedReader csvFile) throws IOException, InvalidArgumentException{
+            BufferedReader csvFile) throws IOException, IllegalArgumentException{
         String[] columnsArgument = getIndexAndSplit(cliArguments, "--columns=")[1].split(",");
         ArrayList<Integer> columnNameToIndex = new ArrayList<Integer>();
         String[] columnNames = csvFile.readLine().split(",");
@@ -81,16 +83,16 @@ public class Parser {
      * @param cliArguments the arguments supplied via the command line.
      * @param argument the argument to be split.
      * @return an array list of all of the parameters of the desired argument.
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
     public static String[] getIndexAndSplit(String[] cliArguments, String argument)
-            throws InvalidArgumentException {
+            throws IllegalArgumentException {
         for(int i = 0; i < cliArguments.length; i++) {
             if(cliArguments[i].lastIndexOf(argument) >= 0) {
                 return cliArguments[i].split(argument);
             }
         }
-        throw new InvalidArgumentException();
+        throw new IllegalArgumentException();
     }
 
     /**

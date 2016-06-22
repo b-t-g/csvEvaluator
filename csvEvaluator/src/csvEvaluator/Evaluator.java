@@ -1,11 +1,11 @@
-package csvEvaluator;
+package csvEvaluator.src.csvEvaluator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import csvEvaluator.Parser.Operation;
+import csvEvaluator.src.csvEvaluator.Parser.Operation;
 
 
 public class Evaluator {
@@ -21,10 +21,10 @@ public class Evaluator {
      * files given in the command line arguments.
      * @throws NullPointerException
      * @throws IOException 
-     * @throws InvalidArgumentException 
+     * @throws IllegalArgumentException
      */
     private static ArrayList<Integer> getColumnNameToIndex (String[] cliArguments)
-            throws NullPointerException, IOException, InvalidArgumentException {
+            throws NullPointerException, IOException, IllegalArgumentException {
         if(csvFile.size() == 1) {
             return Parser.parseColumnNameToIndex(cliArguments, csvFile.get(0));
         }
@@ -46,26 +46,20 @@ public class Evaluator {
      * Evaluates the given operation (given by the field operation) on the 
      * given columns on the given files.
      * @throws IOException
-     * @throws InvalidArgumentException 
+     * @throws IllegalArgumentException
      */
-    public  static void Evaluate(String[] cliArguments) throws IOException,
-                                                               InvalidArgumentException {
+    public static void Evaluate(String[] cliArguments) throws IOException,
+                                                               IllegalArgumentException {
         csvFile = Parser.parseFiles(cliArguments);
         columnNameToIndex = getColumnNameToIndex(cliArguments);
         operation = Parser.parseOperation(cliArguments);
         if(csvFile.size() == 0 || columnNameToIndex.size() == 0) {
-            throw new InvalidArgumentException();
+            throw new IllegalArgumentException();
         }
         ArrayList<Float> totalColumn;
         boolean singleFile = csvFile.size() == 1;
         switch(operation) {
         case MEAN: 
-            totalColumn = collectDataSingleFile();
-            float sum = 0;
-            for(float f : totalColumn) {
-                sum += f;
-            }
-            System.out.println(sum/totalColumn.size());
             break;
 
         case MIN:
@@ -163,37 +157,35 @@ public class Evaluator {
     }
 
     /**
-     * This function reads the data from one tables (and possibly multiple
+     * This function reads the data from one table (and possibly multiple
      * columns) and returns either the result of the computation given by the
      * operation field or the columns specified by the command line arguments.
      * @return either
-     * @throws InvalidArgumentException 
+     * @throws IllegalArgumentException
      * @throws IOException 
      */
-    public static ArrayList<Float> collectDataSingleFile() throws InvalidArgumentException,
+    public static ArrayList<Float> collectDataSingleFile() throws IllegalArgumentException,
                                                                   IOException {
         BufferedReader file = csvFile.get(0);
-        ArrayList<Float> aggregateTotal = new ArrayList<Float>();
-        String values;
-        try {
-            values = file.readLine();
-        } catch (IOException e) {
-            return aggregateTotal;
-        }
+        String values = file.readLine();
+        ArrayList<Float> aggregateTotal = new ArrayList<>();
         while(values != null) {
-            String[] splitValues = values.split(",");
-            float intermediateValue = getIntermediateValue(0, splitValues);
-            for(int i = 1; i < columnNameToIndex.size(); i++) {
-                ArrayList<Float> toBeCombined = new ArrayList<Float>();
-                toBeCombined.add(intermediateValue);
-                toBeCombined.add(getIntermediateValue(i, splitValues));
-                intermediateValue = combineFloats(toBeCombined);
-            }
-            aggregateTotal.add(intermediateValue);
+            aggregateTotal.add(aggregateFromSingleFile(values));
             values = file.readLine();
         }
-        file.close();
         return aggregateTotal;
+    }
+
+    private static Float aggregateFromSingleFile(String values) throws IOException {
+        String[] splitValues = values.split(",");
+        float intermediateValue = getIntermediateValue(0, splitValues);
+        for(int i = 1; i < columnNameToIndex.size(); i++) {
+            ArrayList<Float> toBeCombined = new ArrayList<Float>();
+            toBeCombined.add(intermediateValue);
+            toBeCombined.add(getIntermediateValue(i, splitValues));
+            intermediateValue = combineFloats(toBeCombined);
+        }
+        return intermediateValue;
     }
 
     private static float getIntermediateValue(int index, String[] splitValues)
